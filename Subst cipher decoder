@@ -1,1 +1,1018 @@
+from tkinter import *
+from tkinter import filedialog
+from tkinter import colorchooser
+from complementary import pick
+import threading
+import time
+from string import ascii_uppercase
+import re
+import pyperclip
+from tkinter import messagebox
 
+LC = 'white'
+textheight = 3
+ctext = []
+copied_text = ''
+
+def showhelp():
+    messagebox.showinfo(title='How to', message="Enter your ciphered text into the text area, click calculate to show possible options for common letters.\n Logically choose the possible options, leave 'none' if not sure.\n Text with chosed letters will be displayed, fill in the most probable letters and click on submit, eventually text will be fully deciphered.")
+
+def change(x):
+    global textheight
+    if textheight != 1 or x == 1:
+        if textheight != 29 or x == -1:
+            textheight += x * 2
+            text_area.config(height=textheight)
+
+def openfile():
+    file = filedialog.askopenfilename(initialdir='D:\\42077\\Downloads',
+                                      title="Open a file",
+                                      filetypes=(("text files", "*.txt"),
+                                                     ("all files", "*.*")))
+
+    try:
+        text_area.delete(1.0, END)
+        text = open(file, 'r')
+        text_area.insert(1.0, text.read())
+
+    except: Exception
+
+    finally:
+        text.close()
+
+def colorpick():
+    a = colorchooser.askcolor()
+    root.config(bg=pick(a))
+    text_area.config(fg=pick(a))
+    text_area.config(bg=a[1])
+    canvas.config(bg=pick(a))
+    erlabel.config(bg=pick(a))
+    space_label.config(bg=pick(a))
+
+def setcolor(k):
+    colors = [((245, 245, 220), '#F5F5DC'),((0, 0, 0), '#000000'), ((86, 62, 159), '#563e9f')]
+
+    root.config(bg=pick(colors[k]))
+    text_area.config(bg=colors[k][1])
+    text_area.config(fg=pick(colors[k]))
+    erlabel.config(bg=pick(colors[k]))
+    space_label.config(bg=pick(colors[k]))
+
+def mainl(e):
+    Llist = []
+    sub = [i for i in e if i != 'none']
+    for x in [y for y in sub if y in list(ascii_uppercase)]:
+        Llist.append((e.count(x), x))
+
+    if Llist == []:
+        return 'none'
+    else:
+        return sorted(list(set(Llist)))[-1][1]
+
+optlist = []
+dcletters = 0
+display_list = []
+
+def decode():
+    global optlist
+    global dcletters
+
+
+    text_area.config(height=3)
+    textheight = 3
+
+    check = 0
+    checkdict = {'E': fqoption_name1.get(), 'T': fqoption_name2.get(), 'A': fqoption_name3.get(),
+                 'O': fqoption_name4.get(), 'A1': sloption_name1.get(), 'I': sloption_name2.get(), 'L': dloption_name1.get(),
+                 'E1': dloption_name2.get(), 'S': dloption_name3.get(), 'TH': tlpoption_name1.get(),
+                 'SH': tlpoption_name2.get(), 'RE': tlpoption_name3.get(),
+                 'ING': trioption_name1.get(), 'ION': trioption_name2.get(), 'THE': tenoption_name1.get(),
+                 'AND': tenoption_name2.get(),
+                 'FOR': tenoption_name3.get(), 'WAS': tenoption_name4.get(), 'OF': twenoption_name1.get(),
+                 'TO': twenoption_name2.get(),
+                 'IN': twenoption_name3.get(), 'IS': twenoption_name4.get(), 'THAT': fouroption_name.get(),
+                 'S1': apoption_name1.get(),
+                 'D': apoption_name2.get(), 'M': apoption_name3.get(), 'LL': apoption_name4.get(),
+                 'RE1': apoption_name5.get()}
+
+    my_lets = 'ETAOILSHRNGDFW'
+    el, tl, al, ol, il, ll, sl, hl, rl, nl, gl, dl, fl, wl = [], [], [], [], [], [], [], [], [], [], [], [], [], []
+    alllet = [el, tl, al, ol, il, ll, sl, hl, rl, nl, gl, dl, fl, wl]
+    for p in range(len(my_lets)):
+        for key, value in checkdict.items():
+            for i in range(len(key)):
+                if key[i] == my_lets[p]:
+                    alllet[p].append(value[i])
+
+    mylist = []
+    for i in alllet:
+        mylist.append((list((set([x for x in i if x in list(ascii_uppercase)])))))
+        if len(set([x for x in i if x in list(ascii_uppercase)])) not in [0, 1]:
+            check += 1
+            break
+    if check != 0:
+        erlabel.config(text='Different output letters for same letter!', bg='white')
+    else:
+        cutlist = [x for x in mylist if x != []]
+        cutlist = [x[0] for x in cutlist]
+        if len(cutlist) != len(set(cutlist)):
+            erlabel.config(text="Same output letters for different letters!", bg='white')
+        else:
+            erlabel.config(text='', bg=root['bg'])
+
+            e = [fqoption_name1.get(), fqoption_name1.get(), dloption_name2.get(), tlpoption_name3.get()[1],
+                 tenoption_name1.get()[2], apoption_name5.get()[1]]
+            E = mainl(e)
+
+            t = [fqoption_name2.get(), tlpoption_name1.get()[0], tenoption_name1.get()[0], twenoption_name2.get()[0],
+                 fouroption_name.get()[0]]
+            T = mainl(t)
+
+            a = [sloption_name1.get(), sloption_name1.get(), fqoption_name3.get(), tenoption_name2.get()[0],
+                 tenoption_name4.get()[1], fouroption_name.get()[2]]
+            A = mainl(a)
+
+            o = [fqoption_name4.get(), trioption_name2.get()[1], tenoption_name3.get()[1], twenoption_name1.get()[0],
+                 twenoption_name2.get()[1]]
+            O = mainl(o)
+
+            i = [sloption_name2.get(), sloption_name2.get(), trioption_name1.get()[0], trioption_name2.get()[0],
+                 twenoption_name3.get()[0], twenoption_name4.get()[0]]
+            I = mainl(i)
+
+            if apoption_name4.get() != 'none':
+                L = apoption_name4.get()[0]
+                if L in dloptiontuple1:
+                    dloption_name1.set(L)
+            else:
+                L = dloption_name1.get()
+
+            s = [dloption_name3.get(), tlpoption_name2.get()[0], tenoption_name4.get()[2],
+                 twenoption_name4.get()[1],
+                 apoption_name1.get(), apoption_name1.get()]
+            S = mainl(s)
+
+            h = [tlpoption_name1.get()[1], tlpoption_name2.get()[1], tenoption_name1.get()[1],
+                 fouroption_name.get()[1]]
+            H = mainl(h)
+
+            r = [tlpoption_name3.get()[0], tenoption_name3.get()[2], apoption_name5.get()[0],
+                 apoption_name5.get()[0]]
+            R = mainl(r)
+
+            n = [trioption_name1.get()[1], trioption_name2.get()[2], tenoption_name2.get()[1], twenoption_name3.get()[1]]
+            N = mainl(n)
+
+            if tenoption_name2.get()[2] in list(ascii_uppercase):
+                D = tenoption_name2.get()[2]
+            else:
+                D = apoption_name2.get()
+
+            if tenoption_name3.get()[0] in list(ascii_uppercase):
+                F = tenoption_name3.get()[0]
+            else:
+                F = twenoption_name1.get()[1]
+
+            dcletters0 = [('e', E), ('t', T), ('a', A),
+                          ('o', O),
+                          ('i', I), ('l', L), ('s', S), ('h', H), ('r', R),
+                          ('n', N), ('g', trioption_name1.get()[2]), ('d', D), ('f', F),
+                          ('w', tenoption_name4.get()[0])]
+
+            dcletters = [x for x in dcletters0 if x[1] != 'none']
+            dcletters = [x for x in dcletters if x[1] in list(ascii_uppercase)]
+
+            optconst = 0
+
+            if len(optlist) == 0:
+                for _ in range(len(text_area.get(1.0, END))):
+                    optlist.append(0)
+
+            if len(display_list) == 0:
+                for _ in range(len(text_area.get(1.0, END))):
+                    display_list.append(0)
+
+            rx = 0
+            cy = 0
+            for i in text_area.get(1.0, END):
+                if i.upper() in [x[1] for x in dcletters]:
+                    if i.upper() != i:
+                        let1 = dcletters[(''.join([x[1] for x in dcletters])).find(i.upper())][0]
+                        display_list[optconst] = Label(outframe, text=let1)
+                        display_list[optconst].grid(row=rx, column=cy)
+                        cy +=1
+                        if cy == textwidth:
+                            cy = 0
+                            rx += 1
+                        optlist[optconst] = let1
+                        optconst += 1
+                    else:
+                        let1 = dcletters[(''.join([x[1] for x in dcletters])).find(i.upper())][0]
+                        display_list[optconst] = Label(outframe, text=let1.upper())
+                        display_list[optconst].grid(row=rx, column=cy)
+                        optlist[optconst] = let1.upper()
+                        cy += 1
+                        if cy == textwidth:
+                            cy = 0
+                            rx += 1
+                        optconst += 1
+                elif i == ' ':
+                    display_list[optconst] = Label(outframe, text='  ')
+                    display_list[optconst].grid(row=rx, column=cy)
+                    optlist[optconst] = ' '
+                    cy += 1
+                    if cy == textwidth:
+                        cy = 0
+                        rx += 1
+                    optconst += 1
+                elif i.upper() in list(ascii_uppercase):
+                    optlist[optconst] = Text(outframe, width=1, height=1, bd=3)
+                    display_list[optconst] = optlist[optconst]
+                    optlist[optconst].grid(row=rx, column=cy)
+                    cy += 1
+                    if cy == textwidth:
+                        cy = 0
+                        rx += 1
+                    optconst += 1
+                else:
+                    display_list[optconst] = Label(outframe, text=i)
+                    display_list[optconst].grid(row=rx, column=cy)
+                    optlist[optconst] = i
+                    cy += 1
+                    if cy == textwidth:
+                        cy = 0
+                        rx += 1
+                    optconst += 1
+
+            submit_button.pack()
+            space_label.pack()
+
+def submit():
+    global dcletters
+
+    copied_text = ''
+
+    seclist = [x if type(x) == str else x.get(1.0, END) for x in optlist]
+
+    for i in [x[0] for x in seclist if len(x) > 1]:
+        dcletters.append((i.lower(), (text_area.get(1.0, END).lower()[''.join([x[0] if len(x) > 1 else x for x in seclist]).find(i)]).upper()))
+    dcletters = list(set(dcletters))
+
+    optconst = 0
+    rx = 0
+    cy = 0
+    for i in text_area.get(1.0, END):
+        if i.upper() in [x[1] for x in dcletters]:
+            if i.upper() != i:
+                let2 = dcletters[(''.join([x[1] for x in dcletters])).find(i.upper())][0]
+                display_list[optconst].destroy()
+                Label(outframe, text=let2).grid(row=rx, column=cy)
+                cy += 1
+                if cy == textwidth:
+                    cy = 0
+                    rx += 1
+                optlist[optconst] = let2
+                optconst += 1
+
+                copied_text += let2
+            else:
+                let2 = dcletters[(''.join([x[1] for x in dcletters])).find(i.upper())][0]
+                display_list[optconst].destroy()
+                Label(outframe, text=let2.upper()).grid(row=rx, column=cy)
+                optlist[optconst] = let2.upper()
+                cy += 1
+                if cy == textwidth:
+                    cy = 0
+                    rx += 1
+                optconst += 1
+
+                copied_text += let2.upper()
+        elif i == ' ':
+            display_list[optconst].destroy()
+            Label(outframe, text='  ').grid(row=rx, column=cy)
+            optlist[optconst] = ' '
+            cy += 1
+            if cy == textwidth:
+                cy = 0
+                rx += 1
+            optconst += 1
+
+            copied_text += ' '
+        elif i.upper() in list(ascii_uppercase):
+            cy += 1
+            if cy == textwidth:
+                cy = 0
+                rx += 1
+            optconst += 1
+            copied_text += '_'
+        else:
+            display_list[optconst].destroy()
+            Label(outframe, text=i).grid(row=rx, column=cy)
+            optlist[optconst] = i
+            cy += 1
+            if cy == textwidth:
+                cy = 0
+                rx += 1
+            optconst += 1
+
+            copied_text += i
+
+    copied_text = list(copied_text)
+    if ctext == []:
+        for i in copied_text:
+            ctext.append(i)
+    else:
+        for i in range(len(copied_text)):
+            ctext[i] = copied_text[i]
+
+    copy_button.pack()
+
+def copytext():
+    pyperclip.copy(''.join(ctext))
+
+def calculate():
+    if len(set(list(text_area.get(1.0, END).upper()))) < 10:
+        erlabel = Label(root, text='text is too short/not diverse')
+        erlabel.pack()
+        erlabel.after(1000, erlabel.destroy)
+    elif len(set(list(text_area.get(1.0, END).upper()))) > 700:
+        erlabel2.pack()
+        erlabel2.after(1000, erlabel2.destroy)
+    else:
+        acount = []
+
+        for i in list(set(list(text_area.get(1.0, END).upper()))):
+            if i in list(ascii_uppercase):
+                acount.append((text_area.get(1.0, END).upper().count(i), i))
+
+        acount = sorted(acount, reverse=True)
+        fqoptiontuple1 = []
+        for i in acount[:10]:
+            fqoptiontuple1.append(i[1])
+
+        fqoptiontuple1.insert(len(fqoptiontuple1), 'none')
+        fqoption_name1.set(fqoptiontuple1[0])
+        fqletter_1 = OptionMenu(frame_1, fqoption_name1, *fqoptiontuple1)
+        fqletter_1.grid(row=0, column=1)
+
+        fqoptiontuple2 = fqoptiontuple1
+        fqoption_name2.set(fqoptiontuple2[1])
+        fqletter_2 = OptionMenu(frame_1, fqoption_name2, *fqoptiontuple2)
+        fqletter_2.grid(row=1, column=1)
+
+        fqoptiontuple3 = fqoptiontuple1
+        fqoption_name3.set(fqoptiontuple3[2])
+        fqletter_3 = OptionMenu(frame_1, fqoption_name3, *fqoptiontuple3)
+        fqletter_3.grid(row=2, column=1)
+
+        fqoptiontuple4 = fqoptiontuple1
+        fqoption_name4.set(fqoptiontuple4[3])
+        fqletter_4 = OptionMenu(frame_1, fqoption_name4, *fqoptiontuple4)
+        fqletter_4.grid(row=3, column=1)
+
+        sloptiontuple1 = list((re.compile(r'\s(\w)\s').findall(text_area.get(1.0, END).upper())))
+
+        sllist = []
+        for i in list(set(sloptiontuple1)):
+            sllist.append([sloptiontuple1.count(i), i])
+
+        sloptiontuple1 = []
+        sllist = sorted(sllist)
+        for _ in range(len(sllist)):
+            sloptiontuple1.append(sllist[-1][1].upper())
+            sllist.pop()
+
+        sloptiontuple1.insert(len(sloptiontuple1), 'none')
+
+        sloption_name1.set(sloptiontuple1[0])
+        sletter_1 = OptionMenu(frame_1, sloption_name1, *sloptiontuple1)
+        sletter_1.grid(row=5, column=1)
+
+        sloptiontuple2 = sloptiontuple1
+        if len(sloptiontuple1) >= 2:
+            sloption_name2.set(sloptiontuple1[1])
+        else:
+            sloption_name2.set('none')
+        sletter_2 = OptionMenu(frame_1, sloption_name2, *sloptiontuple2)
+        sletter_2.grid(row=6, column=1)
+
+        dllist = []
+        for i in list(ascii_uppercase):
+            if i + i in text_area.get(1.0, END).upper():
+                dllist.append([text_area.get(1.0, END).upper().count(i + i), i])
+
+        dllist = sorted(dllist)
+        dloptiontuple1 = []
+        for _ in range(len(dllist)):
+            dloptiontuple1.append(dllist[-1][1])
+            dllist.pop()
+
+        dloptiontuple1.insert(len(dloptiontuple1), 'none')
+        dloption_name1.set(dloptiontuple1[0])
+        dletter_1 = OptionMenu(frame_1, dloption_name1, *dloptiontuple1)
+        dletter_1.grid(row=8, column=1)
+
+        if len(dloptiontuple1) > 1:
+            dloptiontuple2 = dloptiontuple1
+            dloption_name2.set(dloptiontuple1[1])
+            dletter_2 = OptionMenu(frame_1, dloption_name2, *dloptiontuple2)
+            dletter_2.grid(row=9, column=1)
+
+        if len(dloptiontuple1) > 2:
+            dloptiontuple3 = dloptiontuple1
+            dloption_name3.set(dloptiontuple1[2])
+            dletter_3 = OptionMenu(frame_1, dloption_name3, *dloptiontuple3)
+            dletter_3.grid(row=10, column=1)
+
+        elif len(dloptiontuple1) == 2:
+            dloptiontuple3 = dloptiontuple1
+            dloption_name3.set(dloptiontuple1[1])
+            dletter_3 = OptionMenu(frame_1, dloption_name3, *dloptiontuple3)
+            dletter_3.grid(row=10, column=1)
+
+        lcount = []
+        for word in text_area.get(1.0, END).upper().split():
+            if word[-1] in [',', '.', ':']:
+                word = word[:-1]
+            if len(word) > 1:
+                for i in range(len(word) - 1):
+                    if word[i] != word[i + 1]:
+                        lcount.append((text_area.get(1.0, END).upper().count((word[i] + word[i + 1]).upper()),
+                                       word[i] + word[i + 1]))
+
+        dpatlets = sorted(list(set(lcount)))[-8:]
+
+        tlpoptiontuple1 = []
+        for _ in range(k1 := len(dpatlets)):
+            tlpoptiontuple1.append(dpatlets[-1][1].upper())
+            dpatlets.pop()
+
+        tlpoptiontuple1.insert(k1, 'none')
+        tlpoption_name1.set(tlpoptiontuple1[0])
+        tlpletter_1 = OptionMenu(frame_1, tlpoption_name1, *tlpoptiontuple1)
+        tlpletter_1.grid(row=0, column=3)
+
+        tlpoptiontuple2 = tlpoptiontuple1
+        tlpoption_name2.set(tlpoptiontuple1[1])
+        tlpletter_2 = OptionMenu(frame_1, tlpoption_name2, *tlpoptiontuple2)
+        tlpletter_2.grid(row=1, column=3)
+
+        tlpoptiontuple3 = tlpoptiontuple1
+        tlpoption_name3.set(tlpoptiontuple1[2])
+        tlpletter_3 = OptionMenu(frame_1, tlpoption_name3, *tlpoptiontuple3)
+        tlpletter_3.grid(row=2, column=3)
+
+        tcount = []
+        for word in text_area.get(1.0, END).upper().split():
+            if word[-1] in [',', '.', ':']:
+                word = word[:-1]
+            if len(word) > 3:
+                for i in range(len(word) - 2):
+                    if word[i] != word[i + 1] and word[i] != word[i + 2] and word[i + 1] != word[i + 2]:
+                        tcount.append((text_area.get(1.0, END).upper().count(word[i] + word[i + 1] + word[i + 2]),
+                                       word[i] + word[i + 1] + word[i + 2]))
+
+        tpatlets = sorted(list(set(tcount)))[-6:]
+
+        trioptiontuple1 = []
+        for _ in range(k2 := len(tpatlets)):
+            trioptiontuple1.append(tpatlets[-1][1].upper())
+            tpatlets.pop()
+
+        trioptiontuple1.insert(k2, 'none')
+        trioption_name1.set(trioptiontuple1[0])
+        triletter1 = OptionMenu(frame_1, trioption_name1, *trioptiontuple1)
+        triletter1.grid(row=4, column=3)
+
+        trioptiontuple2 = trioptiontuple1
+        try:
+            trioption_name2.set(trioptiontuple1[1])
+        except IndexError:
+            trioption_name2.set('none')
+        triletter2 = OptionMenu(frame_1, trioption_name2, *trioptiontuple2)
+        triletter2.grid(row=5, column=3)
+
+        tlwcount = []
+        for word in text_area.get(1.0, END).upper().split():
+            if word[-1] in [',', '.', ':']:
+                word = word[:-1]
+            if len(word) == 3:
+                if word[0] != word[1] and word[0] != word[2] and word[1] != word[2]:
+                    tlwcount.append((text_area.get(1.0, END).upper().count(word), word))
+
+        tlwlets = sorted(list(set(tlwcount)), reverse=True)
+
+        tenoptiontuple1 = []
+        for i in tlwlets[:min(8, len(tlwlets))]:
+            tenoptiontuple1.append(i[1])
+
+        tenoptiontuple1.insert(min(8, len(tlwlets)), 'none')
+        tenoption_name1.set(tenoptiontuple1[0])
+        tenletter1 = OptionMenu(frame_1, tenoption_name1, *tenoptiontuple1)
+        tenletter1.grid(row=7, column=3)
+
+        tenoptiontuple2 = tenoptiontuple1
+        try:
+            tenoption_name2.set(tenoptiontuple1[1])
+        except IndexError:
+            tenoption_name2.set('none')
+        tenletter2 = OptionMenu(frame_1, tenoption_name2, *tenoptiontuple2)
+        tenletter2.grid(row=8, column=3)
+
+        tenoptiontuple3 = tenoptiontuple1
+        try:
+            tenoption_name3.set(tenoptiontuple1[2])
+        except IndexError:
+            tenoption_name3.set('none')
+        tenletter3 = OptionMenu(frame_1, tenoption_name3, *tenoptiontuple3)
+        tenletter3.grid(row=9, column=3)
+
+        tenoptiontuple4 = tenoptiontuple1
+        try:
+            tenoption_name4.set(tenoptiontuple1[3])
+        except IndexError:
+            tenoption_name4.set('none')
+        tenletter4 = OptionMenu(frame_1, tenoption_name4, *tenoptiontuple4)
+        tenletter4.grid(row=10, column=3)
+
+        twocount = []
+        for word in text_area.get(1.0, END).upper().split():
+            if word[-1] in [',', '.', ':']:
+                word = word[:-1]
+            if len(word) == 2:
+                if word[0] != word[1]:
+                    twocount.append((text_area.get(1.0, END).upper().count(word), word))
+
+        twolets = sorted(list(set(twocount)), reverse=True)
+
+        twenoptiontuple1 = []
+        for i in twolets[:min(8, len(twolets))]:
+            twenoptiontuple1.append(i[1])
+
+        twenoptiontuple1.insert(min(8, len(twolets)), 'none')
+        twenoption_name1.set(twenoptiontuple1[0])
+        twenletter1 = OptionMenu(frame_1, twenoption_name1, *twenoptiontuple1)
+        twenletter1.grid(row=0, column=5)
+
+        twenoptiontuple2 = twenoptiontuple1
+        try:
+            twenoption_name2.set(twenoptiontuple1[1])
+        except IndexError:
+            twenoption_name2.set('none')
+        twenletter2 = OptionMenu(frame_1, twenoption_name2, *twenoptiontuple2)
+        twenletter2.grid(row=1, column=5)
+
+        twenoptiontuple3 = twenoptiontuple1
+        try:
+            twenoption_name3.set(twenoptiontuple1[2])
+        except IndexError:
+            twenoption_name3.set('none')
+        twenletter3 = OptionMenu(frame_1, twenoption_name3, *twenoptiontuple3)
+        twenletter3.grid(row=2, column=5)
+
+        twenoptiontuple4 = twenoptiontuple1
+        try:
+            twenoption_name4.set(twenoptiontuple1[3])
+        except IndexError:
+            twenoption_name4.set('none')
+        twenletter4 = OptionMenu(frame_1, twenoption_name4, *twenoptiontuple4)
+        twenletter4.grid(row=3, column=5)
+
+        fourcount = []
+        for word in text_area.get(1.0, END).upper().split():
+            if word[-1] in [',', '.', ':']:
+                word = word[:-1]
+            if len(word) == 4 and word[0] == word[3]:
+                fourcount.append((text_area.get(1.0, END).upper().count(word), word))
+
+        fourlet = sorted(list(set(fourcount)), reverse=True)
+
+        fouroptiontuple = []
+        for i in fourlet:
+            fouroptiontuple.append(i[1])
+
+        fouroptiontuple.insert(len(fouroptiontuple), 'none')
+
+        fouroption_name.set(fouroptiontuple[0])
+        fourletter = OptionMenu(frame_1, fouroption_name, *fouroptiontuple)
+        fourletter.grid(row=4, column=5)
+
+        apnumbers = re.compile(r"['’](\w+)").findall(text_area.get(1.0, END).upper())
+
+        oneapnum = list(set([x for x in apnumbers if len(x) == 1]))
+        twoapnum = list(set([x for x in apnumbers if len(x) == 2]))
+
+        oneaplets = []
+        for i in oneapnum:
+            oneaplets.append((text_area.get(1.0, END).upper().count(i), i))
+        oneaplets = sorted(oneaplets, reverse=True)
+
+        apoptiontuple1 = []
+        for i in oneaplets:
+            apoptiontuple1.append(i[1])
+
+        twoaplets = []
+        for i in twoapnum:
+            twoaplets.append((text_area.get(1.0, END).upper().count(i), i))
+        twoaplets = sorted(twoaplets, reverse=True)
+
+        apoptiontuple4 = []
+        for i in twoaplets:
+            apoptiontuple4.append(i[1])
+
+        apoptiontuple4.insert(len(apoptiontuple4), 'none')
+
+        apoptiontuple1.insert(len(apoptiontuple1), 'none')
+        apoption_name1.set(apoptiontuple1[0])
+        apletter1 = OptionMenu(frame_1, apoption_name1, *apoptiontuple1)
+        apletter1.grid(row=6, column=5)
+
+        apoptiontuple2 = apoptiontuple1
+        try:
+            apoption_name2.set(apoptiontuple1[2])
+        except IndexError:
+            apoption_name2.set('none')
+        apletter2 = OptionMenu(frame_1, apoption_name2, *apoptiontuple2)
+        apletter2.grid(row=7, column=5)
+
+        apoptiontuple3 = apoptiontuple1
+        try:
+            apoption_name3.set(apoptiontuple1[3])
+        except IndexError:
+            apoption_name3.set('none')
+        apletter3 = OptionMenu(frame_1, apoption_name3, *apoptiontuple3)
+        apletter3.grid(row=8, column=5)
+
+        apoptiontuple4mod = [x for x in apoptiontuple4[:-1] if x[0] == x[1]]
+        apoptiontuple4mod.insert(len(apoptiontuple4mod), 'none')
+        apoption_name4.set(apoptiontuple4mod[0])
+        apletter4 = OptionMenu(frame_1, apoption_name4, *apoptiontuple4)
+        apletter4.grid(row=9, column=5)
+
+        apoptiontuple5 = [x for x in apoptiontuple4 if x not in apoptiontuple4mod]
+        apoptiontuple5.insert(len(apoptiontuple5), 'none')
+        apoption_name5.set(apoptiontuple5[0])
+        apletter5 = OptionMenu(frame_1, apoption_name5, *apoptiontuple5)
+        apletter5.grid(row=10, column=5)
+
+        e = [fqoption_name1.get(), fqoption_name1.get(), dloption_name2.get(), tlpoption_name3.get()[1],
+                tenoption_name1.get()[2], apoption_name5.get()[1]]
+
+        E = mainl(e)
+
+        if E in fqoptiontuple1:
+            fqoption_name1.set(E)
+
+        if E in dloptiontuple1:
+            dloption_name2.set(E)
+
+        for i in tlpoptiontuple1:
+            if i[1] == E:
+                tlpoption_name3.set(i)
+                break
+
+        for i in tenoptiontuple1:
+            if i[2] == E:
+                tenoption_name1.set(i)
+                break
+
+        for i in apoptiontuple5:
+            if i[1] == E:
+                apoption_name5.set(E)
+                break
+
+        r = [tlpoption_name3.get()[0], tenoption_name3.get()[2], apoption_name5.get()[0], apoption_name5.get()[0]]
+        R = mainl(r)
+
+        a = [sloption_name1.get(), sloption_name1.get(), fqoption_name3.get(), tenoption_name2.get()[0],
+             tenoption_name4.get()[1], fouroption_name.get()[2]]
+        A = mainl(a)
+
+        if A in sloptiontuple1:
+            sloption_name1.set(A)
+
+        if A in fqoptiontuple1:
+            fqoption_name3.set(A)
+
+        for i in tenoptiontuple1:
+            if i[0] == A:
+                tenoption_name2.set(i)
+                break
+
+        for i in tenoptiontuple1:
+            if i[1] == A:
+                tenoption_name4.set(i)
+                break
+
+        for i in fouroptiontuple:
+            if i[2] == A:
+                fouroption_name.set(i)
+                break
+
+        i = [sloption_name2.get(), sloption_name2.get(), trioption_name1.get()[0], trioption_name2.get()[0],
+             twenoption_name3.get()[0], twenoption_name4.get()[0]]
+        I = mainl(i)
+
+        if I in sloptiontuple1:
+            sloption_name2.set(I)
+
+        for i in trioptiontuple1:
+            if I == i[0]:
+                trioption_name1.set(i)
+                break
+
+        trik = 0
+        for i in trioptiontuple1:
+            if I == i[0]:
+                trik += 1
+                if trik == 2:
+                    trioption_name2.set(i)
+                    break
+
+        for i in twenoptiontuple1:
+            if I == i[0]:
+                twenoption_name3.set(i)
+                break
+
+        twenk = 0
+        for i in twenoptiontuple1:
+            if I == i[0]:
+                twenk += 1
+                if twenk == 2:
+                    twenoption_name4.set(i)
+                    break
+
+        t = [fqoption_name2.get(), tlpoption_name1.get()[0], tenoption_name1.get()[0], twenoption_name2.get()[0],
+             fouroption_name.get()[0]]
+
+        T = mainl(t)
+
+        if T in fqoptiontuple1:
+            fqoption_name2.set(T)
+
+        for i in tlpoptiontuple1:
+            if i == tenoption_name1.get()[:2]:
+                tlpoption_name1.set(i)
+                break
+
+        o = [fqoption_name4.get(), trioption_name2.get()[1], tenoption_name3.get()[1], twenoption_name1.get()[0],
+             twenoption_name2.get()[1]]
+        O = mainl(o)
+
+        if O in fqoptiontuple1:
+            fqoption_name4.set(O)
+
+        for i in tenoptiontuple1:
+            if i[1] == O:
+                tenoption_name3.set(i)
+                break
+
+        for i in twenoptiontuple1:
+            if i[0] == O:
+                twenoption_name1.set(i)
+                break
+
+        if apoption_name4.get() != 'none':
+            L = apoption_name4.get()[0]
+            if L in dloptiontuple1:
+                dloption_name1.set(L)
+        else:
+            L = dloption_name1.get()
+
+        s = [dloption_name3.get(), tlpoption_name2.get()[0], tenoption_name4.get()[2], twenoption_name4.get()[1],
+             apoption_name1.get(), apoption_name1.get()]
+        S = mainl(s)
+
+        if S in dloptiontuple1:
+            dloption_name3.set(S)
+
+        for i in tlpoptiontuple1:
+            if i[0] == S:
+                tlpoption_name2.set(i)
+                break
+
+        for i in twenoptiontuple1:
+            if i[1] == S:
+                twenoption_name4.set(i)
+                break
+
+        if S in apoptiontuple1:
+            apoption_name1.set(S)
+
+        h = [tlpoption_name1.get()[1], tlpoption_name2.get()[1], tenoption_name1.get()[1], fouroption_name.get()[1]]
+        H = mainl(h)
+
+        n = [trioption_name1.get()[1], trioption_name2.get()[2], twenoption_name3.get()[1]]
+        N = mainl(n)
+
+        if trioption_name1.get()[0] == I and trioption_name1.get()[1] == N:
+            G = trioption_name1.get()[2]
+        else:
+            G = 'none'
+
+        if tenoption_name2.get()[0] == A and tenoption_name2.get()[1] == N:
+            D = tenoption_name2.get()[2]
+            if D in apoptiontuple1:
+                apoption_name2.set(D)
+        else:
+            D = 'none'
+            apoption_name2.set('none')
+
+        if twenoption_name1.get()[0] == O:
+            F = twenoption_name1.get()[1]
+        else:
+            F = 'none'
+
+        if tenoption_name4.get()[1] == A and tenoption_name4.get()[2] == S:
+            W = tenoption_name4.get()[0]
+        else:
+            W = 'none'
+            tenoption_name4.set('none')
+
+root = Tk()
+root.config(bg='#0a0a23')
+root.geometry(f'{root.winfo_screenwidth()}x{root.winfo_screenheight()}+0+0')
+root.title('Cipher decoder')
+
+menubar = Menu(root)
+root.config(menu=menubar)
+
+filemenu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label='File', menu=filemenu)
+filemenu.add_command(label='Open a file', command=openfile)
+
+colormenu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label='Color', menu=colormenu)
+colormenu.add_command(label='Set', command=colorpick)
+colormenu.add_separator()
+colormenu.add_command(label='Beige', command=lambda: setcolor(0))
+colormenu.add_command(label='Black', command=lambda: setcolor(1))
+colormenu.add_command(label='Purple', command=lambda: setcolor(2))
+
+menubar.add_radiobutton(label='Help', command=showhelp)
+
+text_area = Text(root, font=("Times New Roman", 15), bg='#F5F5DC', height=textheight, width=root.winfo_screenwidth())  #, height=TXTHGHT
+text_area.pack()
+
+canvas = Canvas(root, width=root.winfo_screenwidth(), height=8)
+canvas.pack()
+
+canvas.create_line(0, 0, root.winfo_screenwidth(), 0, width=20, fill='#2496a3')
+
+upbutton = Button(root, text='˄', font=('Arial', 16), command=lambda: change(-1))
+upbutton.place(x=root.winfo_screenwidth() - 60, y=190)
+
+downbutton = Button(root, text='˅', font=('Arial', 16), command=lambda: change(1))
+downbutton.place(x=root.winfo_screenwidth() - 60, y=230)
+
+calc_button = Button(root, text='CALCULATE', font=('Comic Sans', 14, 'bold'), bg='red',command=calculate)
+calc_button.pack()
+
+frame_1 = Frame(root, bg=LC)
+frame_1.pack()
+
+fl_label1 = Label(frame_1, text='The most frequent letter (E):  ', bg=LC, font=('consolas', 11), padx=47)
+fl_label1.grid(row=0, column=0)
+fqoption_name1 = StringVar()
+
+fl_label2 = Label(frame_1, text='The 2nd most frequent letter (T):  ', bg=LC, font=('consolas', 11))
+fl_label2.grid(row=1, column=0)
+fqoption_name2 = StringVar()
+
+fl_label3 = Label(frame_1, text='The 3rd most frequent letter (A):  ', bg=LC, font=('consolas', 11))
+fl_label3.grid(row=2, column=0)
+fqoption_name3 = StringVar()
+
+fl_label4 = Label(frame_1, text='The 4th most frequent letter (O):  ', bg=LC, font=('consolas', 11))
+fl_label4.grid(row=3, column=0)
+fqoption_name4 = StringVar()
+
+d1label = Label(frame_1, bg=LC)
+d1label.grid(row=4, column=0, columnspan=2)
+
+sl_label1 = Label(frame_1, text='First single letter (A):  ', bg=LC, font=('consolas', 11))
+sl_label1.grid(row=5, column=0)
+sloption_name1 = StringVar()
+
+sl_label2 = Label(frame_1, text='Second single letter (I):  ', bg=LC, font=('consolas', 11))
+sl_label2.grid(row=6, column=0)
+sloption_name2 = StringVar()
+
+Label(frame_1, bg=LC).grid(row=7, column=0, columnspan=2)
+
+dl_label1 = Label(frame_1, text='First double letter (LL):  ', bg=LC, font=('consolas', 11))
+dl_label1.grid(row=8, column=0)
+dloption_name1 = StringVar()
+
+dl_label2 = Label(frame_1, text='Second double letter (EE):  ', bg=LC, font=('consolas', 11))
+dl_label2.grid(row=9, column=0)
+dloption_name2 = StringVar()
+
+dl_label3 = Label(frame_1, text='Third double letter (SS):  ', bg=LC, font=('consolas', 11))
+dl_label3.grid(row=10, column=0)
+dloption_name3 = StringVar()
+
+tlplabel1 = Label(frame_1, text="TH pattern:  ", bg=LC, font=('consolas', 11), padx=47)
+tlplabel1.grid(row=0, column=2)
+tlpoption_name1 = StringVar()
+
+tlplabel2 = Label(frame_1, text="SH pattern:  ", bg=LC, font=('consolas', 11), padx=47)
+tlplabel2.grid(row=1, column=2)
+tlpoption_name2 = StringVar()
+
+tlplabel3 = Label(frame_1, text="RE pattern:  ", bg=LC, font=('consolas', 11), padx=47)
+tlplabel3.grid(row=2, column=2)
+tlpoption_name3 = StringVar()
+
+Label(frame_1, bg=LC).grid(row=3, column=2, columnspan=2)
+
+trilabel1 = Label(frame_1, text='ING pattern:  ', bg=LC, font=('consolas', 11), padx=47)
+trilabel1.grid(row=4, column=2)
+trioption_name1 = StringVar()
+
+trilabel2 = Label(frame_1, text='ION pattern:  ', bg=LC, font=('consolas', 11), padx=47)
+trilabel2.grid(row=5, column=2)
+trioption_name2 = StringVar()
+
+Label(frame_1, bg=LC).grid(row=6, column=2, columnspan=2)
+
+tenlabel1 = Label(frame_1, text='Word THE:  ', bg=LC, font=('consolas', 11), padx=47)
+tenlabel1.grid(row=7, column=2)
+tenoption_name1 = StringVar()
+
+tenlabel2 = Label(frame_1, text='Word AND:  ', bg=LC, font=('consolas', 11), padx=47)
+tenlabel2.grid(row=8, column=2)
+tenoption_name2 = StringVar()
+
+tenlabel3 = Label(frame_1, text='Word FOR:  ', bg=LC, font=('consolas', 11), padx=47)
+tenlabel3.grid(row=9, column=2)
+tenoption_name3 = StringVar()
+
+tenlabel4 = Label(frame_1, text='Word WAS:  ', bg=LC, font=('consolas', 11), padx=47)
+tenlabel4.grid(row=10, column=2)
+tenoption_name4 = StringVar()
+
+twenlabel1 = Label(frame_1, text='Word OF:  ', bg=LC, font=('consolas', 11), padx=47)
+twenlabel1.grid(row=0, column=4)
+twenoption_name1 = StringVar()
+
+twenlabel2 = Label(frame_1, text='Word TO:  ', bg=LC, font=('consolas', 11), padx=47)
+twenlabel2.grid(row=1, column=4)
+twenoption_name2 = StringVar()
+
+twenlabel3 = Label(frame_1, text='Word IN:  ', bg=LC, font=('consolas', 11), padx=47)
+twenlabel3.grid(row=2, column=4)
+twenoption_name3 = StringVar()
+
+twenlabel4 = Label(frame_1, text='Word IS:  ', bg=LC, font=('consolas', 11), padx=47)
+twenlabel4.grid(row=3, column=4)
+twenoption_name4 = StringVar()
+
+fourlabel = Label(frame_1, text='Word THAT:  ', bg=LC, font=('consolas', 11), padx=47)
+fourlabel.grid(row=4, column=4)
+fouroption_name = StringVar()
+
+Label(frame_1, bg=LC).grid(row=5, column=4, columnspan=2)
+
+aplabel1 = Label(frame_1, text="Apostrophes letter (S):  ", bg=LC, font=('consolas', 11), padx=47)
+aplabel1.grid(row=6, column=4)
+apoption_name1 = StringVar()
+
+aplabel2 = Label(frame_1, text="Apostrophes letter (D):  ", bg=LC, font=('consolas', 11))
+aplabel2.grid(row=7, column=4)
+apoption_name2 = StringVar()
+
+aplabel3 = Label(frame_1, text="Apostrophes letter (M):  ", bg=LC, font=('consolas', 11))
+aplabel3.grid(row=8, column=4)
+apoption_name3 = StringVar()
+
+aplabel4 = Label(frame_1, text="Apostrophes letters (LL):  ", bg=LC, font=('consolas', 11))
+aplabel4.grid(row=9, column=4)
+apoption_name4 = StringVar()
+
+aplabel5 = Label(frame_1, text="Apostrophes letters (RE):  ", bg=LC, font=('consolas', 11))
+aplabel5.grid(row=10, column=4)
+apoption_name5 = StringVar()
+
+Label(frame_1, bg=LC).grid(row=11, column=0, columnspan=5)
+
+decode_button = Button(frame_1, text='DECODE', font=('Comic Sans', 14, 'bold'), bg='red', command=decode)
+decode_button.grid(row=12, column=2)
+
+erlabel = Label(root, bg='#0a0a23', fg='red', font=('Arial', 15))
+erlabel.pack()
+
+erlabel2 = Label(root, bg='#0a0a23', text='text is too long', fg='red', font=('Arial', 15))
+
+submit_button = Button(root, text='SUBMIT', bg='red', font=('Comic Sans', 14, 'bold'), command=submit)
+
+textwidth = round((105/1536)*root.winfo_screenwidth()) - 10
+
+image = PhotoImage(file='my_image.png')
+copy_button = Button(root, text='Copy', font=('Arial', 12, 'bold'), image=image, compound='top', command=copytext)
+
+space_label = Label(root, height=1, bg='#0a0a23')
+outframe = Frame(root)
+outframe.pack()
+
+root.mainloop()
