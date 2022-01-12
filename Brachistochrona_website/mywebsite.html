@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="mywebsite.css" />
+    <title>Brachistochrona</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+  </head>
+  <body>
+    <h1>Brachistochrone</h1>
+    <i class="fa fa-bars fa-2x" id="bars"></i>
+    <div class="nav" id="navLinks">
+      <i class="fa fa-times" id="close"></i>
+      <ul>
+        <li id="home">Home</li>
+        <li id="about">About</li>
+        <li>Games</li>
+        <li>Contact us</li>
+        <li>
+          <i class="fa fa-phone fa-1x"></i>
+        </li>
+      </ul>
+    </div>
+    <button id="animation_b">Hearts</button>
+    <div id="container">
+      <div id="floated"><img src="images/brachistochrone.png" /></div>
+      <h2>Lore</h2>
+      <p>
+        In physics and mathematics, a brachistochrone curve, or curve of fastest
+        descent, is the one lying on the plane between a point A and a lower
+        point B, where B is not directly below A, on which a bead slides
+        frictionlessly under the influence of a uniform gravitational field to a
+        given end point in the shortest time. The problem was posed by Johann
+        Bernoulli in 1696. The brachistochrone curve is the same shape as the
+        tautochrone curve; both are cycloids. However, the portion of the
+        cycloid used for each of the two varies. More specifically, the
+        brachistochrone can use up to a complete rotation of the cycloid (at the
+        limit when A and B are at the same level), but always starts at a cusp.
+        In contrast, the tautochrone problem can use only up to the first half
+        rotation, and always ends at the horizontal. The problem can be solved
+        using tools from the calculus of variations and optimal control. The
+        curve is independent of both the mass of the test body and the local
+        strength of gravity. Only a parameter is chosen so that the curve fits
+        the starting point A and the ending point B. If the body is given an
+        initial velocity at A, or if friction is taken into account, then the
+        curve that minimizes time differs from the tautochrone curve.
+      </p>
+    </div>
+    <div class="myhearts">
+      <!--<i class="fa fa-heart"></i>-->
+    </div>
+    <div class="abt_me">
+      <h2>What is this site about</h2>
+      <p>
+        Honestly I really don't know, but I suppose I can add some kind of
+        simple javascript games I guess
+      </p>
+    </div>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/buttons.js"></script>
+  </body>
+</html>
