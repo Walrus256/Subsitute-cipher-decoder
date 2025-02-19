@@ -1,3 +1,2 @@
-- 👋 Hi, I’m @Walrus256
-- 👀 I’m interested in theoretical physics and web scraping
-- 🌱 I’m currently learning some useful python libraries
+My first ever big coding project. It's a decoder with gui that helps you 
+with decoding a message that was encoded by a substitution cipher.
